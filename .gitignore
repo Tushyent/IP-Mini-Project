@@ -1,0 +1,58 @@
+# =========================
+# GENERAL
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# JAVA / SPRING BOOT
+# =========================
+backend/**/target/
+backend/**/*.log
+backend/**/*.class
+backend/**/*.jar
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar
+
+# =========================
+# NODE / REACT
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+
+# =========================
+# ENV FILES
+# =========================
+.env
+.env.local
+frontend/.env
+
+# =========================
+# IDE FILES
+# =========================
+.idea/
+.vscode/
+*.iml
+
+# =========================
+# DATABASE (LOCAL)
+# =========================
+*.db
+data/
+
+# =========================
+# TEMP FILES
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# COVERAGE
+# =========================
+coverage/
