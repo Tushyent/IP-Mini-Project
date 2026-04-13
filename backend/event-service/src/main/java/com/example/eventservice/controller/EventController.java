@@ -20,34 +20,27 @@ public class EventController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
     public EventModel createEvent(@Valid @RequestBody EventRequest request) {
         EventModel model = mapRequest(request);
         return service.saveEvent(model);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public List<EventModel> getAll() {
         return service.getAllEvents();
     }
 
     @GetMapping("/{rollNo}")
     public List<EventModel> getByRoll(@PathVariable Integer rollNo, Authentication authentication) {
-        if (authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return service.getEventsByRoll(rollNo);
-        }
         return service.getEventsByRoll(rollNo);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public EventModel updateEvent(@PathVariable String id, @Valid @RequestBody EventRequest request) {
         return service.updateEvent(id, mapRequest(request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteEvent(@PathVariable String id) {
         service.deleteEvent(id);
     }
