@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
     private final Algorithm algorithm;
 
-    public JwtUtil(@Value("${app.jwt.secret}") String secret) {
+    public JwtUtil(@Value("${app.jwt.secret:mysecretkey123}") String secret) {
         this.algorithm = Algorithm.HMAC256(secret);
     }
 
     public boolean validateToken(String token) {
         try {
-            JWT.require(algorithm).build().verify(token);
+            parse(token);
             return true;
         } catch (Exception ex) {
             return false;
@@ -24,12 +24,14 @@ public class JwtUtil {
     }
 
     public String extractEmail(String token) {
-        DecodedJWT jwt = JWT.require(algorithm).build().verify(token);
-        return jwt.getSubject();
+        return parse(token).getSubject();
     }
 
     public String extractRole(String token) {
-        DecodedJWT jwt = JWT.require(algorithm).build().verify(token);
-        return jwt.getClaim("role").asString();
+        return parse(token).getClaim("role").asString();
+    }
+
+    private DecodedJWT parse(String token) {
+        return JWT.require(algorithm).build().verify(token);
     }
 }

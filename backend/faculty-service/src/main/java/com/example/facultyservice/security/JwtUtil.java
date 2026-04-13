@@ -11,14 +11,12 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${app.jwt.secret:FacultyServiceSecretKey_SuperSecure_2025}")
-    private String secret;
+    private final Algorithm algorithm;
+    private final long expiryMs;
 
-    @Value("${app.jwt.expiry-ms:36000000}")
-    private long expiryMs;
-
-    private Algorithm getAlgorithm() {
-        return Algorithm.HMAC256(secret);
+    public JwtUtil(@Value("${app.jwt.secret:mysecretkey123}") String secret, @Value("${app.jwt.expiry-ms:36000000}") long expiryMs) {
+        this.algorithm = Algorithm.HMAC256(secret);
+        this.expiryMs = expiryMs;
     }
 
     public String generateToken(String email) {
@@ -26,20 +24,23 @@ public class JwtUtil {
                 .withSubject(email)
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiryMs))
-                .sign(getAlgorithm());
+                .sign(algorithm);
     }
 
     public String extractEmail(String token) {
-        DecodedJWT decoded = JWT.require(getAlgorithm()).build().verify(token);
-        return decoded.getSubject();
+        return parse(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            JWT.require(getAlgorithm()).build().verify(token);
+            parse(token);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private DecodedJWT parse(String token) {
+        return JWT.require(algorithm).build().verify(token);
     }
 }

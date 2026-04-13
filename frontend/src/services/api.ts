@@ -1,9 +1,8 @@
 import { auth } from "../utils/auth";
 
-// Use environment variables with fallbacks for local development
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const STUDENT_API = import.meta.env.VITE_STUDENT_API_URL || BASE_URL || "http://localhost:8082";
-const EVENT_API = import.meta.env.VITE_EVENT_API_URL || BASE_URL || "http://localhost:8081";
+// Environment variables with fallbacks for local development
+const STUDENT_API = import.meta.env.VITE_STUDENT_API_URL || "http://localhost:8082";
+const EVENT_API = import.meta.env.VITE_EVENT_API_URL || "http://localhost:8081";
 
 export class ApiError extends Error {
   status: number;
@@ -23,12 +22,32 @@ const parseResponse = async <T>(response: Response): Promise<T> => {
 };
 
 /**
- * API Service
- * Handles communication with backend microservices.
- * Uses Authorization header with JWT Bearer token for protected routes.
+ * Handle API calls with centralized error handling and loading indicators
  */
+async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token = auth.getToken();
+  if (!token) {
+    window.location.href = "/login";
+    throw new Error("No authorization token found. Redirecting to login.");
+  }
+
+  const headers = {
+    ...options.headers,
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json"
+  };
+
+  try {
+    const res = await fetch(url, { ...options, headers });
+    return await parseResponse<T>(res);
+  } catch (err) {
+    console.error(`API Call failed to ${url}:`, err);
+    throw err;
+  }
+}
+
 export const api = {
-  registerStudent: async (data: { name: string; rollNo: number; email: string; password: string }) => {
+  registerStudent: async (data: any) => {
     const res = await fetch(`${STUDENT_API}/student/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -36,7 +55,7 @@ export const api = {
     });
     return parseResponse(res);
   },
-  registerFaculty: async (data: { name: string; rollNo: number; email: string; password: string }) => {
+  registerFaculty: async (data: any) => {
     const res = await fetch(`${STUDENT_API}/student/faculty/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,7 +63,7 @@ export const api = {
     });
     return parseResponse(res);
   },
-  login: async (data: { email: string; password: string }) => {
+  login: async (data: any) => {
     const res = await fetch(`${STUDENT_API}/student/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,52 +71,17 @@ export const api = {
     });
     return parseResponse(res);
   },
-  getMyEvents: async (rollNo: number) => {
-    const token = auth.getToken();
-    if (!token) {
-        window.location.href = "/login";
-        throw new Error("No token found, redirecting to login");
-    }
-    const res = await fetch(`${EVENT_API}/events/${rollNo}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return parseResponse(res);
-  },
-  getAllEvents: async () => {
-    const token = auth.getToken();
-    if (!token) {
-        window.location.href = "/login";
-        throw new Error("No token found, redirecting to login");
-    }
-    const res = await fetch(`${EVENT_API}/events`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return parseResponse(res);
-  },
-  addEvent: async (data: { eventName: string; studentName: string; rollNo: number; location: string; date: string; description: string }) => {
-    const token = auth.getToken();
-    if (!token) {
-        window.location.href = "/login";
-        throw new Error("No token found, redirecting to login");
-    }
-    const res = await fetch(`${EVENT_API}/events/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data)
-    });
-    return parseResponse(res);
-  },
-  updateEvent: async (id: string, data: { eventName: string; studentName: string; rollNo: number; location: string; date: string; description: string }) => {
-    const token = auth.getToken();
-    if (!token) {
-        window.location.href = "/login";
-        throw new Error("No token found, redirecting to login");
-    }
-    const res = await fetch(`${EVENT_API}/events/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data)
-    });
-    return parseResponse(res);
-  }
+  getMyEvents: (rollNo: number) => fetchWithAuth(`${EVENT_API}/events/${rollNo}`),
+  getAllEvents: () => fetchWithAuth(`${EVENT_API}/events`),
+  addEvent: (data: any) => fetchWithAuth(`${EVENT_API}/events/add`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  }),
+  updateEvent: (id: string, data: any) => fetchWithAuth(`${EVENT_API}/events/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  }),
+  deleteEvent: (id: string) => fetchWithAuth(`${EVENT_API}/events/${id}`, {
+    method: "DELETE"
+  })
 };
