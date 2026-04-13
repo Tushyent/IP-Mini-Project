@@ -16,6 +16,7 @@ import java.util.List;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     private final JwtUtil jwtUtil;
 
     public JwtAuthFilter(JwtUtil jwtUtil) {
@@ -23,31 +24,39 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        // OPTIONS preflight must NEVER be blocked — pass immediately
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            String auth = request.getHeader("Authorization");
-            if (auth != null && auth.startsWith("Bearer ")) {
-                String token = auth.substring(7);
-                if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (jwtUtil.validateToken(token)
+                        && SecurityContextHolder.getContext().getAuthentication() == null) {
                     String email = jwtUtil.extractEmail(token);
-                    String role = jwtUtil.extractRole(token);
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String role  = jwtUtil.extractRole(token);
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    email,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                            );
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
-        } catch (Exception e) {
-            // Log if needed, but DO NOT block the request
+            // No Authorization header → simply proceed without authentication (permitAll handles it)
+        } catch (Exception ex) {
+            // Token invalid / expired — do NOT block the request, just clear context
+            SecurityContextHolder.clearContext();
         }
+
         filterChain.doFilter(request, response);
     }
 }

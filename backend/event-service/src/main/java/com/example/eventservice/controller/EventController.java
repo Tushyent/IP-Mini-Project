@@ -4,7 +4,6 @@ import com.example.eventservice.dto.EventRequest;
 import com.example.eventservice.model.EventModel;
 import com.example.eventservice.service.EventService;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,28 +11,30 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/events")
-@CrossOrigin(origins = "https://ip-mini-project-tushyent.vercel.app")
+@CrossOrigin(
+    origins = "https://ip-mini-project-tushyent.vercel.app",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+               RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowedHeaders = "*",
+    allowCredentials = "true"
+)
 public class EventController {
+
     private final EventService service;
 
     public EventController(EventService service) {
         this.service = service;
     }
 
-    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
-    public org.springframework.http.ResponseEntity<?> handleOptions() {
-        return org.springframework.http.ResponseEntity.ok().build();
+    @GetMapping
+    public List<EventModel> getAll() {
+        return service.getAllEvents();
     }
 
     @PostMapping("/add")
     public EventModel createEvent(@Valid @RequestBody EventRequest request) {
         EventModel model = mapRequest(request);
         return service.saveEvent(model);
-    }
-
-    @GetMapping
-    public List<EventModel> getAll() {
-        return service.getAllEvents();
     }
 
     @GetMapping("/{rollNo}")
