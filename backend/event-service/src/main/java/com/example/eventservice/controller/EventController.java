@@ -12,11 +12,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/events")
+@CrossOrigin(origins = "https://ip-mini-project-tushyent.vercel.app")
 public class EventController {
     private final EventService service;
 
     public EventController(EventService service) {
         this.service = service;
+    }
+
+    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
+    public org.springframework.http.ResponseEntity<?> handleOptions() {
+        return org.springframework.http.ResponseEntity.ok().build();
     }
 
     @PostMapping("/add")
