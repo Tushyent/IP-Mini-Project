@@ -3,6 +3,7 @@ package com.example.facultyservice.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -10,18 +11,21 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "FacultyServiceSecretKey_SuperSecure_2025";
-    private static final long EXPIRY = 1000L * 60 * 60 * 10;
+    @Value("${app.jwt.secret:FacultyServiceSecretKey_SuperSecure_2025}")
+    private String secret;
+
+    @Value("${app.jwt.expiry-ms:36000000}")
+    private long expiryMs;
 
     private Algorithm getAlgorithm() {
-        return Algorithm.HMAC256(SECRET);
+        return Algorithm.HMAC256(secret);
     }
 
     public String generateToken(String email) {
         return JWT.create()
                 .withSubject(email)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRY))
+                .withExpiresAt(new Date(System.currentTimeMillis() + expiryMs))
                 .sign(getAlgorithm());
     }
 
