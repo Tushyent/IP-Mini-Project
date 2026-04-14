@@ -6,12 +6,14 @@ import ProtectedRoute from "./ProtectedRoute";
 import Landing from "../pages/Landing";
 import FacultyRegister from "../pages/FacultyRegister";
 import FacultyLogin from "../pages/FacultyLogin";
+import Features from "../pages/Features";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/features" element={<Features />} />
         <Route path="/student/register" element={<Register />} />
         <Route path="/student/login" element={<Login />} />
         <Route path="/faculty/register" element={<FacultyRegister />} />

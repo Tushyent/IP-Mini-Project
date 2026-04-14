@@ -72,6 +72,15 @@ export default function Landing() {
             >
               Faculty Login
             </Link>
+            <Link
+              to="/features"
+              className="w-full rounded-xl px-6 py-3 text-sm font-bold text-[#003087] text-center
+                         bg-white border-2 border-[#003087] shadow-sm hover:shadow-md
+                         transition-all duration-200 active:scale-95
+                         hover:bg-blue-50"
+            >
+              Explore System Details
+            </Link>
           </div>
 
           {/* Footer — institution name */}
