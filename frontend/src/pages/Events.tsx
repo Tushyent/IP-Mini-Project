@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EventCard from "../components/EventCard";
@@ -6,6 +6,7 @@ import Toast from "../components/Toast";
 import { api, ApiError } from "../services/api";
 import { auth } from "../utils/auth";
 import type { EventItem, StudentDetails } from "../utils/types";
+import ssnLogo from "../assets/ssnlogo.png";
 
 export default function Events() {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -110,95 +111,163 @@ export default function Events() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-100 px-4 py-8">
+    <div className="min-h-screen bg-slate-50">
       {toast ? <Toast message={toast} type="success" /> : null}
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-slate-900">Events Dashboard</h1>
-            <button onClick={logout} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+      
+      {/* Professional Header */}
+      <header className="sticky top-0 z-30 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4">
+            <div className="rounded-lg bg-white p-1.5 shadow-sm ring-1 ring-slate-200">
+              <img src={ssnLogo} alt="SSN Logo" className="h-10 w-auto object-contain" />
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-bold text-[#003087]">Student Event</h1>
+              <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Management System</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden text-right md:block">
+              <p className="text-sm font-bold text-slate-900">{user?.name}</p>
+              <p className="text-xs text-slate-500">{user?.role === "ADMIN" ? "Faculty Administrator" : `Roll No: ${user?.rollNo}`}</p>
+            </div>
+            <button 
+              onClick={logout} 
+              className="rounded-xl bg-[#003087] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-blue-800 hover:shadow-lg active:scale-95"
+            >
               Logout
             </button>
           </div>
-          {user?.role === "ADMIN" ? <p className="mt-1 text-sm text-slate-600">Faculty (Admin)</p> : null}
-          {user?.role !== "ADMIN" && user ? (
-            <div className="mt-3 w-full rounded-[2rem] border-2 border-blue-200 bg-white/95 p-4 shadow-sm">
-              <p className="mb-3 inline-block rounded-md border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold tracking-wide text-blue-900">Student Details</p>
-              <div className="grid overflow-hidden rounded-lg border-2 border-blue-200 text-sm text-slate-800 sm:grid-cols-3">
-                <div className="border-b border-blue-200 p-3 sm:border-b-0 sm:border-r">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Name</p>
-                  <p className="mt-1 font-semibold text-slate-900">{user.name}</p>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Events Dashboard</h2>
+            <p className="mt-1 text-slate-500">
+              {user?.role === "ADMIN" 
+                ? "Manage and monitor all student event registrations." 
+                : "View and track your participating event registrations."}
+            </p>
+          </div>
+
+          {user?.role !== "ADMIN" && user && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex flex-wrap gap-x-8 gap-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Profile Name</p>
+                  <p className="font-semibold text-slate-900">{user.name}</p>
                 </div>
-                <div className="border-b border-blue-200 p-3 sm:border-b-0 sm:border-r">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Roll No</p>
-                  <p className="mt-1 font-semibold text-slate-900">{user.rollNo}</p>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Roll Number</p>
+                  <p className="font-semibold text-slate-900">{user.rollNo}</p>
                 </div>
-                <div className="p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</p>
-                  <p className="mt-1 break-all font-semibold text-slate-900">{user.email}</p>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</p>
+                  <p className="font-semibold text-slate-900">{user.email}</p>
                 </div>
               </div>
             </div>
-          ) : null}
+          )}
         </div>
-        {error ? <p className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600">{error}</p> : null}
-        {user?.role === "ADMIN" ? (
-          <form onSubmit={createEvent} className="mb-6 grid grid-cols-1 gap-3 rounded-2xl bg-white/90 p-4 shadow md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Event Name</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Enter event name" value={eventForm.eventName} onChange={(e) => setEventForm({ ...eventForm, eventName: e.target.value })} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Student Name</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Enter student name" value={eventForm.studentName} onChange={(e) => setEventForm({ ...eventForm, studentName: e.target.value })} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Roll Number</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Enter roll number" value={eventForm.rollNo} onChange={(e) => setEventForm({ ...eventForm, rollNo: e.target.value })} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Location</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Enter location" value={eventForm.location} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Date</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="YYYY-MM-DD" value={eventForm.date} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Description</label>
-              <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Enter description" value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} />
-            </div>
-            <button className="rounded-lg bg-blue-700 px-3 py-2 font-semibold text-white transition hover:bg-blue-800 md:col-span-1">
-              {editingEventId ? "Update Event" : "Add Event"}
-            </button>
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 md:col-span-1"
-            >
-              Clear
-            </button>
-          </form>
-        ) : null}
-        {!loading ? (
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-slate-900">Events</h2>
-            <p className="text-sm text-slate-600">
-              {user?.role === "ADMIN" ? "Click a card to modify the event details." : "Browse your registered event details below."}
-            </p>
-          </div>
-        ) : null}
-        {loading ? <LoadingSpinner /> : null}
-        {!loading && events.length === 0 ? (
-          <div className="rounded-2xl bg-white/85 p-8 text-center text-slate-600 shadow">No events available yet.</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} clickable={user?.role === "ADMIN"} onClick={() => startEdit(event)} />
-            ))}
+
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-600">
+            {error}
           </div>
         )}
-      </div>
+
+        {user?.role === "ADMIN" && (
+          <section className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm ring-4 ring-blue-50/50">
+              <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-slate-900">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">
+                  {editingEventId ? "!" : "+"}
+                </span>
+                {editingEventId ? "Update Existing Event" : "Create New Event Registration"}
+              </h3>
+              
+              <form onSubmit={createEvent} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Event Name</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="e.g. Hackathon 2024" value={eventForm.eventName} onChange={(e) => setEventForm({ ...eventForm, eventName: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Student Name</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="Full name" value={eventForm.studentName} onChange={(e) => setEventForm({ ...eventForm, studentName: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Roll Number</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="e.g. 210101" value={eventForm.rollNo} onChange={(e) => setEventForm({ ...eventForm, rollNo: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Location</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="e.g. Main Auditorium" value={eventForm.location} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Date</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="YYYY-MM-DD" value={eventForm.date} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Description</label>
+                  <input className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="Short description" value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} />
+                </div>
+                
+                <div className="flex gap-3 lg:col-span-3">
+                  <button className="flex-1 rounded-xl bg-[#003087] px-6 py-3 font-bold text-white shadow-md transition-all hover:bg-blue-800 hover:shadow-lg active:scale-95">
+                    {editingEventId ? "Save Changes" : "Create Event"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="rounded-xl border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 active:scale-95"
+                  >
+                    Clear Form
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        )}
+
+        <section>
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-slate-900">Active Registrations</h3>
+            <p className="text-sm text-slate-500">
+              {user?.role === "ADMIN" ? "Manage all registrations across the portal." : "History of events you've registered for."}
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : events.length === 0 ? (
+            <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300">
+                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <p className="text-lg font-semibold text-slate-900">No events found</p>
+              <p className="mt-1 text-slate-500">There are no records matching your account at this time.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {events.map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={event} 
+                  clickable={user?.role === "ADMIN"} 
+                  onClick={() => startEdit(event)} 
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,43 +1,85 @@
 import { Link } from "react-router-dom";
-import landingPageImage from "../assets/landing-page-image.png";
+import campusBg from "../assets/landing_page.jpg";
+import ssnLogo from "../assets/ssnlogo.png";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-100">
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-14 lg:grid-cols-2 lg:items-center">
-        <div className="rounded-2xl bg-white/85 p-6 shadow-xl ring-1 ring-blue-100">
-          <p className="mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold tracking-wide text-blue-800">
-            Student Event Registration and Management System
-          </p>
-          <h1 className="text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
-            Student Event Registration and Management System
+    <div
+      className="relative min-h-screen w-full overflow-hidden flex items-center justify-center"
+      style={{
+        backgroundImage: `url(${campusBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" />
+
+      {/* Centered card */}
+      <div className="relative z-10 w-full max-w-sm mx-4 sm:mx-auto">
+        <div className="rounded-2xl bg-white/[0.18] backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-8 sm:p-10 flex flex-col items-center text-center">
+
+          {/* SSN Logo on white pill */}
+          <div className="mb-6 rounded-xl bg-white px-5 py-3 shadow-md">
+            <img
+              src={ssnLogo}
+              alt="SSN College Logo"
+              className="h-12 w-auto object-contain"
+            />
+          </div>
+
+          {/* Title — SSN blue glow */}
+          <h1
+            className="text-[1.65rem] sm:text-[1.85rem] font-bold text-white leading-snug tracking-tight"
+            style={{
+              textShadow:
+                "0 0 18px rgba(0, 48, 135, 0.95), 0 0 36px rgba(255, 255, 255, 0.55)",
+            }}
+          >
+            Student Event
+            <span className="block" style={{ color: "#93c5fd" }}>
+              Management System
+            </span>
           </h1>
-          <p className="mt-4 text-base leading-relaxed text-slate-600">
-            A secure, modern portal for colleges to register participants, manage campus events, and streamline faculty administration.
+
+          {/* Subtitle */}
+          <p className="mt-3 text-sm text-white/75 leading-relaxed max-w-xs">
+            A secure platform to manage student events and registrations
           </p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <Link to="/student/login" className="rounded-lg bg-blue-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-950">
+
+          {/* Divider */}
+          <div className="my-7 h-px w-full bg-white/20" />
+
+          {/* Buttons — SSN navy (#003087) */}
+          <div className="flex flex-col gap-3 w-full">
+            <Link
+              to="/student/login"
+              className="w-full rounded-xl px-6 py-3 text-sm font-semibold text-white text-center
+                         shadow-md transition-all duration-200 active:scale-95
+                         hover:brightness-110 hover:shadow-lg"
+              style={{ backgroundColor: "#003087" }}
+            >
               Student Login
             </Link>
-            <Link to="/faculty/login" className="rounded-lg bg-blue-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-950">
-              Faculty (Admin) Login
-            </Link>
-            <Link to="/student/register" className="rounded-lg border border-blue-200 bg-white px-4 py-3 text-center text-sm font-semibold text-blue-800 transition hover:bg-blue-50">
-              Student Registration
-            </Link>
-            <Link to="/faculty/register" className="rounded-lg border border-blue-200 bg-white px-4 py-3 text-center text-sm font-semibold text-blue-800 transition hover:bg-blue-50">
-              Faculty Registration
+            <Link
+              to="/faculty/login"
+              className="w-full rounded-xl px-6 py-3 text-sm font-semibold text-white text-center
+                         shadow-md transition-all duration-200 active:scale-95
+                         hover:brightness-110 hover:shadow-lg"
+              style={{ backgroundColor: "#003087", opacity: 0.85 }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.85")}
+            >
+              Faculty Login
             </Link>
           </div>
+
+          {/* Footer — institution name */}
+          <p className="mt-7 text-xs text-white/50 tracking-wide">
+            SSN College of Engineering (SSNCE)
+          </p>
         </div>
-        <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-blue-100">
-          <img
-            src={landingPageImage}
-            alt="College students in front of campus building"
-            className="h-full w-full object-cover"
-          />
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api, ApiError } from "../services/api";
 import { auth } from "../utils/auth";
 import type { LoginResponse } from "../utils/types";
 import Toast from "../components/Toast";
+import campusBg from "../assets/landing_page.jpg";
+import ssnLogo from "../assets/ssnlogo.png";
 
 export default function FacultyLogin() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -34,25 +36,110 @@ export default function FacultyLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-100 p-6">
+    <div
+      className="relative min-h-screen w-full overflow-hidden flex items-center justify-center"
+      style={{
+        backgroundImage: `url(${campusBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" />
+
       {toast ? <Toast message={toast} type="success" /> : null}
-      <button onClick={() => navigate("/")} className="mb-6 rounded-lg border border-blue-300 bg-white/80 px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-white">
-        {"← Home"}
+
+      {/* Back to home */}
+      <button
+        onClick={() => navigate("/")}
+        className="absolute top-5 left-5 z-20 flex items-center gap-1.5 rounded-lg border border-white/30
+                   bg-white/15 px-3 py-2 text-xs font-semibold text-white/90 backdrop-blur-sm
+                   transition hover:bg-white/25"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Home
       </button>
-      <div className="mx-auto mt-14 max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Faculty Login</h1>
-        <p className="mb-6 text-sm text-slate-500">Use Faculty (Admin) credentials</p>
-        <form onSubmit={handleLogin} className="space-y-3">
-          <input className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <input className="w-full rounded-lg border border-slate-200 px-3 py-2" type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-          {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
-          <button disabled={loading} className="w-full rounded-lg bg-blue-900 p-2 font-semibold text-white transition hover:bg-blue-950 disabled:opacity-60">
-            {loading ? "Logging in..." : "Faculty Login"}
-          </button>
-        </form>
-        <button onClick={() => navigate("/faculty/register")} className="mt-4 w-full rounded-lg border border-slate-200 p-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-          Go to Faculty Registration
-        </button>
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-sm mx-4 sm:mx-auto">
+        <div className="rounded-2xl bg-white/[0.18] backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.45)] p-8 sm:p-10">
+
+          {/* Header */}
+          <div className="mb-7 text-center">
+            <div className="mx-auto mb-4 inline-block rounded-xl bg-white px-5 py-3 shadow-md">
+              <img
+                src={ssnLogo}
+                alt="SSN Logo"
+                className="h-11 w-auto object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-white">Faculty Login</h1>
+            <p className="mt-1 text-sm text-white/65">Use your Faculty (Admin) credentials</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/75 uppercase tracking-wider">
+                Email
+              </label>
+              <input
+                type="email"
+                className="w-full rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm text-white
+                           placeholder:text-white/40 backdrop-blur-sm transition
+                           focus:border-indigo-400 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                placeholder="faculty@college.edu"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/75 uppercase tracking-wider">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm text-white
+                           placeholder:text-white/40 backdrop-blur-sm transition
+                           focus:border-indigo-400 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-lg bg-red-500/20 border border-red-400/30 px-4 py-2.5 text-sm font-medium text-red-300">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-md
+                         transition-all duration-200 hover:bg-indigo-500 hover:shadow-indigo-500/30 hover:shadow-lg
+                         disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+            >
+              {loading ? "Logging in…" : "Faculty Login"}
+            </button>
+          </form>
+
+          {/* Signup link */}
+          <p className="mt-6 text-center text-sm text-white/55">
+            Not a user?{" "}
+            <Link
+              to="/faculty/register"
+              className="font-semibold text-indigo-300 underline-offset-2 hover:text-indigo-200 hover:underline transition"
+            >
+              Create your account
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
