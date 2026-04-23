@@ -28,13 +28,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            // Point Spring Security's CorsFilter at our bean — this handles
-            // OPTIONS preflight at the FILTER level, before DispatcherServlet
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.HEAD, "/**").permitAll()
-                .requestMatchers("/health").permitAll()
+                .requestMatchers("/", "/health").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/events/**").permitAll()
                 .anyRequest().permitAll()
@@ -47,13 +45,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Single, authoritative CORS configuration source.
-     * Spring Security registers a CorsFilter using this bean which intercepts
-     * OPTIONS preflight requests at the servlet filter level — BEFORE Spring MVC
-     * routing. This is why 400 errors from MVC disappear: the preflight never
-     * reaches the DispatcherServlet.
-     */
+   
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -61,7 +53,6 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        // Cache preflight for 1 hour to reduce repeated OPTIONS calls
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

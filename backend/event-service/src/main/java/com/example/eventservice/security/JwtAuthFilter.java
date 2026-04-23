@@ -27,8 +27,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // OPTIONS preflight must NEVER be blocked — pass immediately
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        // Allow CORS preflight and UptimeRobot HEAD requests immediately
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || "HEAD".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             // No Authorization header → simply proceed without authentication (permitAll handles it)
         } catch (Exception ex) {
-            // Token invalid / expired — do NOT block the request, just clear context
+            // Clear context if token is malformed/expired to safely fail unauthenticated
             SecurityContextHolder.clearContext();
         }
 
